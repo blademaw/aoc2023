@@ -6,10 +6,10 @@ import (
 )
 
 func ReadLines(file string) ([]string, error) {
-  dat, err := os.ReadFile(file)
-  if err != nil {
-    return nil, err
-  }
+	dat, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
 
-  return strings.Split(strings.TrimSpace(string(dat)), "\n"), nil
+	return strings.Split(strings.TrimSpace(string(dat)), "\n"), nil
 }
