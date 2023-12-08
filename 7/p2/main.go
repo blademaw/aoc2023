@@ -10,6 +10,7 @@ import (
 )
 
 var CARDSTRENGTH = map[rune]int{
+	'J': -1,
 	'2': 0,
 	'3': 1,
 	'4': 2,
@@ -19,10 +20,9 @@ var CARDSTRENGTH = map[rune]int{
 	'8': 6,
 	'9': 7,
 	'T': 8,
-	'J': 9,
-	'Q': 10,
-	'K': 11,
-	'A': 12,
+	'Q': 9,
+	'K': 10,
+	'A': 11,
 }
 
 type HandType int
@@ -37,6 +37,8 @@ const (
 	FiveOfAKind
 )
 
+// Go doesn't have this built-in except for reflect.DeepEqual, which
+// is apparently slow? Just test to see if two int lists are the same.
 func testEq(a []int, b []int) bool {
 	if len(a) != len(b) {
 		return false
@@ -50,22 +52,35 @@ func testEq(a []int, b []int) bool {
 }
 
 func handToType(hand string) HandType {
-	// Convert a hand to a type by counting each character, sorting the list of
-	// counts, and identifying a type based on that.
 	m := make(map[rune]int)
+	jokers := 0 // Jokers just pretend to be the highest-count card
 
 	for _, c := range hand {
-		m[c] += 1
+		if c == 'J' {
+			jokers++
+		} else {
+			m[c] += 1
+		}
 	}
 
-	counts := make([]int, len(m))
+	// Avoid initializing a list of length 0
+	var counts []int
+	if len(m) == 0 {
+		counts = []int{0}
+	} else {
+		counts = make([]int, len(m))
+	}
+
+	// Put the card count map into a list and sort to identify types
 	i := 0
 	for _, c := range m {
 		counts[i] = c
 		i++
 	}
 	slices.Sort(counts)
+	counts[len(counts)-1] += jokers
 
+	// Find a type
 	if testEq(counts, []int{5}) {
 		return FiveOfAKind
 	} else if testEq(counts, []int{1, 4}) {
